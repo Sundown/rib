@@ -89,8 +89,8 @@ static const rib_Noun nil
 	(rib_Error) {   \
 		c, m    \
 	}
-
 #define new_vector(v) (rib_Noun){vector_t, true, {.vector_v = v}};
+void rib_interpret_string(const char* text);
 
 rib_Noun intern(const char* buf);
 rib_Noun new_string(char* x);
@@ -110,4 +110,22 @@ rib_Error read_expr(const char* input, const char** end, rib_Noun* result);
 void rib_load_file(const char* path);
 rib_Error rib_lex(const char* rib_String, const char** start, const char** end);
 rib_Noun reverse_list(rib_Noun list);
+rib_Noun cons(rib_Noun car_val, rib_Noun cdr_val);
+void rib_print_expr(rib_Noun a);
+
+void rib_print_error(rib_Error e);
+void rib_load_file(const char* path);
+char* read(const char* path);
+char* append_string(char** dst, char* src);
+char* rib_new_string();
+char* to_string(rib_Noun a, bool write);
+char* type_to_string(rib_NounType a);
+char* error_to_string(rib_Error e);
+
+rib_Noun vector_to_noun(rib_Vector* a, size_t start);
+void vector_new(rib_Vector* a);
+void vector_add(rib_Vector* a, rib_Noun item);
+
+rib_Noun new_string(char* x);
+rib_Noun intern(const char* s);
 rib_Noun cons(rib_Noun car_val, rib_Noun cdr_val);
