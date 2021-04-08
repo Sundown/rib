@@ -10,8 +10,8 @@ rib_Error parse_simple(const char* start, const char* end, rib_Noun* result) {
 
 	double val = strtod(start, &p);
 	if (p == end) {
-		result->type = nribber_t;
-		result->value.nribber = val;
+		result->type = number_t;
+		result->value.number = val;
 		return MakeErrorCode(OK);
 	} else if (start[0] == '"') {
 		result->type = string_t;

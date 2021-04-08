@@ -1,5 +1,5 @@
 ### rib
 
-# NOTHING HERE YET!
+# NOTHING HERE YET, check back soon!
 
-A LISP flavoured compiler backend using LLVM
+A LISP syntax compiler backend emitting LLVM.

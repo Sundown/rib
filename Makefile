@@ -1,10 +1,16 @@
-CFLAGS += -Wall -W -pedantic -march=native -std=c11 -lm -ofast
-SRC = src/gen.c src/lex.c src/main.c src/util.c src/parse.c
+CFLAGS += -Wall -W -pedantic -march=native -std=c11 -lm -ofast `llvm-config --cflags`
+LDFLAGS += `llvm-config --ldflags --libs core executionengine analysis native bitwriter --system-libs`
+SRC = src/lex.c src/main.c src/util.c src/parse.c src/gen.c
+CC=clang++
+
 TARGET = rib
-.PHONY: all clean
+.PHONY: rib clean
 
 rib:
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+	$(CC) $(CFLAGS) -x c $(SRC) $(LDFLAGS) -o $(TARGET)
+
+run: rib
+	./rib
 
 clean:
-	$(RM) $(TARGET)
+	$(RM) -r $(TARGET) output/

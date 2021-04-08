@@ -90,11 +90,11 @@ char* to_string(rib_Noun a, bool write) {
 		case noun_t: append_string(&s, a.value.symbol); break;
 		case string_t:
 			if (write) append_string(&s, "\"");
-			append_string(&s, a.value.rib_String->value);
+			append_string(&s, a.value.str->value);
 			if (write) append_string(&s, "\"");
 			break;
-		case nribber_t:
-			sprintf(buf, "%.1f", a.value.nribber);
+		case number_t:
+			sprintf(buf, "%.1f", a.value.number);
 			append_string(&s, buf);
 			break;
 		case bool_t:
@@ -124,7 +124,7 @@ char* type_to_string(rib_NounType a) {
 		case pair_t: return "Pair";
 		case string_t: return "String";
 		case noun_t: return "Noun";
-		case nribber_t: return "Float";
+		case number_t: return "Float";
 		case bool_t: return "Bool";
 		case error_t: return "Error";
 		case vector_t: return "Vector";
@@ -205,7 +205,7 @@ rib_Noun intern(const char* s) {
 rib_Noun new_string(char* x) {
 	rib_Noun a;
 	struct rib_String* s;
-	s = a.value.rib_String = calloc(1, sizeof(struct rib_String));
+	s = a.value.str = calloc(1, sizeof(struct rib_String));
 	s->value = x;
 	s->mark = 0;
 
@@ -227,7 +227,8 @@ void rib_interpret_string(const char* text) {
 		err = read_expr(p, &p, &expr);
 		if (err._) { break; }
 
-		rib_print_expr(expr);
+
 		putchar('\n');
+		gen(expr);
 	}
 }

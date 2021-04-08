@@ -7,13 +7,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #define _REPL_PROMPT "> "
 
 typedef enum {
 	nil_t,
 	pair_t,
 	noun_t,
-	nribber_t,
+	number_t,
 	vector_t,
 	string_t,
 	error_t,
@@ -48,10 +49,10 @@ struct rib_Noun {
 		bool bool_v;
 		char character;
 		rib_Error error_v;
-		double nribber;
+		double number;
 		struct rib_Pair* pair;
 		char* symbol;
-		struct rib_String* rib_String;
+		struct rib_String* str;
 		rib_Vector* vector_v;
 		rib_Error err_v;
 	} value;
@@ -80,6 +81,7 @@ static const rib_Noun nil
 #define car(p)	 ((p).value.pair->car)
 #define cdr(p)	 ((p).value.pair->cdr)
 #define isnil(n) ((n).type == nil_t)
+#define pop(s)	 (s = cdr(s))
 
 #define MakeErrorCode(c) \
 	(rib_Error) {    \
@@ -91,6 +93,8 @@ static const rib_Noun nil
 	}
 #define new_vector(v) (rib_Noun){vector_t, true, {.vector_v = v}};
 void rib_interpret_string(const char* text);
+
+int llvm_start(char* code);
 
 rib_Noun intern(const char* buf);
 rib_Noun new_string(char* x);
@@ -129,3 +133,4 @@ void vector_add(rib_Vector* a, rib_Noun item);
 rib_Noun new_string(char* x);
 rib_Noun intern(const char* s);
 rib_Noun cons(rib_Noun car_val, rib_Noun cdr_val);
+void final_llvm();
