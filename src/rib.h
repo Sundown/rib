@@ -1,4 +1,12 @@
 #include <ctype.h>
+#include <llvm-c/Analysis.h>
+#include <llvm-c/BitWriter.h>
+#include <llvm-c/Core.h>
+#include <llvm-c/DataTypes.h>
+#include <llvm-c/ExecutionEngine.h>
+#include <llvm-c/Target.h>
+#include <llvm-c/Types.h>
+
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -7,7 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
 #define _REPL_PROMPT "> "
 
 typedef enum {
@@ -95,11 +102,13 @@ static const rib_Noun nil
 void rib_interpret_string(const char* text);
 
 int llvm_start(char* code);
+LLVMValueRef gen(rib_Noun tree);
 
 rib_Noun intern(const char* buf);
 rib_Noun new_string(char* x);
 
 rib_Noun reverse_list(rib_Noun list);
+size_t list_len(rib_Noun xs);
 
 void rib_print_expr(rib_Noun a);
 void rib_print_error(rib_Error e);

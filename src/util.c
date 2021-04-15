@@ -1,5 +1,18 @@
 #include "rib.h"
 
+size_t list_len(rib_Noun xs) {
+	rib_Noun* p = &xs;
+	size_t ret = 0;
+	while (!isnil(*p)) {
+		if (p->type != pair_t) { return ret + 1; }
+
+		p = &cdr(*p);
+		ret++;
+	}
+
+	return ret;
+}
+
 rib_Noun reverse_list(rib_Noun list) {
 	rib_Noun tail = nil;
 
@@ -21,7 +34,7 @@ void rib_print_error(rib_Error e) {
 }
 
 void rib_load_file(const char* path) {
-	rib_interpret_string(read(path));
+	llvm_start(read(path));
 }
 
 char* read(const char* path) {
@@ -226,7 +239,6 @@ void rib_interpret_string(const char* text) {
 
 		err = read_expr(p, &p, &expr);
 		if (err._) { break; }
-
 
 		putchar('\n');
 		gen(expr);

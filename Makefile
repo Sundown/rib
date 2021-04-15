@@ -1,6 +1,6 @@
 CFLAGS += -Wall -W -pedantic -march=native -std=c11 -lm -ofast `llvm-config --cflags`
 LDFLAGS += `llvm-config --ldflags --libs core executionengine analysis native bitwriter --system-libs`
-SRC = src/lex.c src/main.c src/util.c src/parse.c src/gen.c
+SRC =  $(shell find ./src -name "*.c")
 CC=clang++
 
 TARGET = rib
