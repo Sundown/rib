@@ -12,7 +12,7 @@ start:
 
 	*start = rib_String;
 
-	if (strchr("(){}[]!:&", rib_String[0]) != NULL) {
+	if (strchr("(){}[]<>!:&", rib_String[0]) != NULL) {
 		*end = rib_String + 1;
 	} else if (rib_String[0] == '"') {
 		for (rib_String++; *rib_String != 0; rib_String++) {
@@ -28,7 +28,7 @@ start:
 		rib_String += strcspn(rib_String, "\n");
 		goto start;
 	} else {
-		*end = rib_String + strcspn(rib_String, "(){}[] \t\r\n;");
+		*end = rib_String + strcspn(rib_String, "(){}[]<> \t\r\n;");
 	}
 
 	return MakeErrorCode(OK);

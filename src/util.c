@@ -208,7 +208,6 @@ rib_Noun cons(rib_Noun car_val, rib_Noun cdr_val) {
 rib_Noun intern(const char* s) {
 	rib_Noun a;
 	a.type = noun_t;
-	a.mut = true;
 	a.value.symbol = calloc(strlen(s) + 1, sizeof(char));
 	strcpy(a.value.symbol, s);
 
@@ -220,13 +219,12 @@ rib_Noun new_string(char* x) {
 	struct rib_String* s;
 	s = a.value.str = calloc(1, sizeof(struct rib_String));
 	s->value = x;
-	s->mark = 0;
 
 	a.type = string_t;
-	a.mut = true;
 
 	return a;
 }
+
 void rib_interpret_string(const char* text) {
 	rib_Error err = MakeErrorCode(OK);
 	const char* p = text;

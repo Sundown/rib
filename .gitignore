@@ -3,3 +3,7 @@ rib
 *.ll
 *.s
 bit
+new_parser
+.vscode
+.DS_Store
+*.sh

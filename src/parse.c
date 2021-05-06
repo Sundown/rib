@@ -165,6 +165,33 @@ rib_Error read_block(const char* start, const char** end, rib_Noun* result) {
 	}
 }
 
+rib_Error read_tuple(const char* start, const char** end, rib_Noun* result) {
+	rib_Noun p = *result = nil;
+	*end = start;
+
+	p = nil;
+
+	while (1) {
+		const char* token;
+		rib_Noun item;
+		rib_Error err = rib_lex(*end, &token, end);
+
+		if (err._) { return err; }
+
+		if (token[0] == '>') {
+			*result = cons(intern("struct"),
+				       cons(reverse_list(p), nil));
+			return MakeErrorCode(OK);
+		}
+
+		err = read_expr(token, end, &item);
+
+		if (err._) { return err; }
+
+		p = cons(item, p);
+	}
+}
+
 rib_Error read_vector(const char* start, const char** end, rib_Noun* result) {
 	*result = nil;
 	rib_Vector* v = calloc(1, sizeof(rib_Vector));
@@ -209,6 +236,10 @@ rib_Error read_expr(const char* input, const char** end, rib_Noun* result) {
 	} else if (token[0] == '{') {
 		return read_block(*end, end, result);
 	} else if (token[0] == '}') {
+		return MakeErrorCode(ERROR_SYNTAX);
+	} else if (token[0] == '<') {
+		return read_tuple(*end, end, result);
+	} else if (token[0] == '>') {
 		return MakeErrorCode(ERROR_SYNTAX);
 	} /* else if (token[0] == '[') {
 		 rib_Noun n0, n1;

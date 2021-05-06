@@ -4,6 +4,16 @@ LLVMModuleRef mod;
 LLVMBuilderRef builder;
 LLVMValueRef cur_fn;
 
+LLVMValueRef default_val(LLVMTypeRef type) {
+	if (type == LLVMInt32Type()) {
+		return LLVMConstInt(LLVMInt32Type(), 0, (LLVMBool) false);
+	} else if (type == LLVMDoubleType()) {
+		return LLVMConstReal(LLVMDoubleType(), 0);
+	} else {
+		NULL;
+	}
+}
+
 LLVMValueRef make_puts() {
 	LLVMValueRef puts_fn = LLVMGetNamedFunction(mod, "puts");
 	if (!puts_fn) {
@@ -16,6 +26,19 @@ LLVMValueRef make_puts() {
 	}
 
 	return puts_fn;
+}
+
+LLVMValueRef make_sqrt() {
+	LLVMValueRef sqrt_fn = LLVMGetNamedFunction(mod, "llvm.sqrt.f64");
+	if (!sqrt_fn) {
+		LLVMTypeRef sqrt_params[] = {LLVMDoubleType()};
+		sqrt_fn = LLVMAddFunction(
+		    mod,
+		    "llvm.sqrt.f64",
+		    LLVMFunctionType(LLVMDoubleType(), sqrt_params, 1, 0));
+	}
+
+	return sqrt_fn;
 }
 
 LLVMValueRef gen(rib_Noun tree) {
@@ -41,8 +64,7 @@ LLVMValueRef gen(rib_Noun tree) {
 			}
 		}
 
-		LLVMValueRef vec = LLVMConstVector(vec_tmp, vec_len);
-		return vec;
+		return LLVMConstVector(vec_tmp, vec_len);
 	} else if (tree.type == number_t) {
 		return LLVMConstInt(
 		    LLVMInt32Type(), (int32_t)tree.value.number, 0);
@@ -107,34 +129,23 @@ LLVMValueRef gen(rib_Noun tree) {
 					     gen(car(cdr(tree))),
 					     gen(car(cdr(cdr(tree)))),
 					     "");
-		} else if (!strcmp(car(tree).value.symbol, "sqrt")) {
-			return LLVMSqr(builder,
-					     gen(car(cdr(tree))),
-					     gen(car(cdr(cdr(tree)))),
-					     "");
 		} else if (!strcmp(car(tree).value.symbol, "var")) {
 			LLVMValueRef var = gen(car(cdr(cdr(tree))));
 			LLVMValueRef global = LLVMAddGlobal(
 			    mod, LLVMTypeOf(var), car(cdr(tree)).value.symbol);
-			LLVMSetInitializer(global, var);
-			return NULL;
 
-		} else if (!strcmp(car(tree).value.symbol, "type")) {
-			rib_Noun p = car(cdr(tree));
-			size_t len_tys = list_len(p);
-			LLVMTypeRef* struct_tys
-			    = calloc(len_tys, sizeof(LLVMTypeRef));
+			LLVMValueRef d = default_val(LLVMTypeOf(var));
 
-			for (size_t i = 0; !isnil(p); i++, pop(p)) {
-				struct_tys[i] = type_calculate(car(p));
+			if (d) {
+				LLVMSetInitializer(global, d);
+				LLVMBuildStore(builder, var, global);
+
+			} else {
+				LLVMSetInitializer(global, var);
 			}
 
-			LLVMStructType(struct_tys, len_tys, (LLVMBool) false);
-
 			return NULL;
-
 		} else if (!strcmp(car(tree).value.symbol, "struct")) {
-
 			rib_Noun p = car(cdr(tree));
 			size_t elm_count = list_len(p);
 			LLVMValueRef* struct_vals
@@ -156,7 +167,28 @@ LLVMValueRef gen(rib_Noun tree) {
 				struct_types, elm_count, (LLVMBool) false),
 			    struct_vals,
 			    elm_count);
-
+		} else if (!strcmp(car(tree).value.symbol, "index")) {
+			return LLVMBuildExtractElement(builder,
+						       gen(car(cdr(tree))),
+						       gen(car(cdr(cdr(tree)))),
+						       "");
+		} else if (!strcmp(car(tree).value.symbol, "real")) {
+			return LLVMConstReal(LLVMDoubleType(),
+					     car(cdr(tree)).value.number);
+		} else if (!strcmp(car(tree).value.symbol, "nat")) {
+			return LLVMConstInt(
+			    LLVMInt32Type(),
+			    (int32_t)car(cdr(tree)).value.number,
+			    (LLVMBool) false);
+		} else if (!strcmp(car(tree).value.symbol, "sqrt")) {
+			LLVMValueRef args[] = {gen(car(cdr(tree)))};
+			LLVMValueRef fn = make_sqrt();
+			return LLVMBuildCall2(builder,
+					      LLVMGetReturnType(LLVMTypeOf(fn)),
+					      fn,
+					      args,
+					      1,
+					      "");
 		} else {
 			LLVMValueRef item
 			    = LLVMGetNamedFunction(mod, car(tree).value.symbol);

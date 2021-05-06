@@ -4,9 +4,10 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/DataTypes.h>
 #include <llvm-c/ExecutionEngine.h>
+#include <llvm-c/Initialization.h>
+#include <llvm-c/Support.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/Types.h>
-
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -42,7 +43,6 @@ static const char* error_string[] = {"",
 				     "Type error",
 				     "File error",
 				     "",
-				     "Cannot mutate constant",
 				     "Coercion error"};
 
 typedef struct rib_Noun rib_Noun;
@@ -50,7 +50,6 @@ typedef struct rib_Vector rib_Vector;
 
 struct rib_Noun {
 	rib_NounType type;
-	bool mut;
 	union {
 		rib_NounType type_v;
 		bool bool_v;
@@ -78,12 +77,10 @@ struct rib_Vector {
 
 struct rib_String {
 	char* value;
-	char mark;
 	struct rib_String* next;
 };
 
-static const rib_Noun nil
-    = {.type = nil_t, .mut = false, .value = {.type_v = nil_t}};
+static const rib_Noun nil = {.type = nil_t, .value = {.type_v = nil_t}};
 
 #define car(p)	 ((p).value.pair->car)
 #define cdr(p)	 ((p).value.pair->cdr)
@@ -98,7 +95,7 @@ static const rib_Noun nil
 	(rib_Error) {   \
 		c, m    \
 	}
-#define new_vector(v) (rib_Noun){vector_t, true, {.vector_v = v}};
+#define new_vector(v) (rib_Noun){vector_t, {.vector_v = v}};
 void rib_interpret_string(const char* text);
 
 int llvm_start(char* code);
