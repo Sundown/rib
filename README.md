@@ -6,7 +6,7 @@ A LISP syntax compiler backend emitting LLVM.
 
 I am actively working on this, don't expect it to die any time soon.
 
-```lisp
+```clj
 (define square real real {
 	(ret  (* % %))
 })
