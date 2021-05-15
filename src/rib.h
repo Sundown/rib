@@ -1,13 +1,7 @@
+#ifndef RIB_HEADER
+#define RIB_HEADER
+
 #include <ctype.h>
-#include <llvm-c/Analysis.h>
-#include <llvm-c/BitWriter.h>
-#include <llvm-c/Core.h>
-#include <llvm-c/DataTypes.h>
-#include <llvm-c/ExecutionEngine.h>
-#include <llvm-c/Initialization.h>
-#include <llvm-c/Support.h>
-#include <llvm-c/Target.h>
-#include <llvm-c/Types.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -16,7 +10,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 #define _REPL_PROMPT "> "
+
+typedef enum {
+	type_void = 0,
+	type_int,
+	type_nat,
+	type_real,
+	type_bool,
+	type_char,
+	type_word,
+	type_bitbuffer
+} rib_type;
 
 typedef enum {
 	nil_t,
@@ -79,7 +85,6 @@ struct rib_String {
 	char* value;
 	struct rib_String* next;
 };
-
 static const rib_Noun nil = {.type = nil_t, .value = {.type_v = nil_t}};
 
 #define car(p)	 ((p).value.pair->car)
@@ -95,11 +100,11 @@ static const rib_Noun nil = {.type = nil_t, .value = {.type_v = nil_t}};
 	(rib_Error) {   \
 		c, m    \
 	}
-#define new_vector(v) (rib_Noun){vector_t, {.vector_v = v}};
-void rib_interpret_string(const char* text);
 
-int llvm_start(char* code);
-LLVMValueRef gen(rib_Noun tree);
+#define new_vector(v) (rib_Noun){vector_t, {.vector_v = v}};
+rib_Vector* rib_interpret_string(const char* text);
+
+void llvm_start(char* code);
 
 rib_Noun intern(const char* buf);
 rib_Noun new_string(char* x);
@@ -140,3 +145,5 @@ rib_Noun new_string(char* x);
 rib_Noun intern(const char* s);
 rib_Noun cons(rib_Noun car_val, rib_Noun cdr_val);
 void final_llvm();
+
+#endif

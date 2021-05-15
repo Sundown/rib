@@ -28,13 +28,10 @@ void rib_print_expr(rib_Noun a) {
 	char* s = to_string(a, 1);
 	printf("%s", s);
 }
+
 void rib_print_error(rib_Error e) {
 	char* s = error_to_string(e);
 	printf("%s", s);
-}
-
-void rib_load_file(const char* path) {
-	llvm_start(read(path));
 }
 
 char* read(const char* path) {
@@ -225,20 +222,19 @@ rib_Noun new_string(char* x) {
 	return a;
 }
 
-void rib_interpret_string(const char* text) {
+rib_Vector* rib_interpret_string(const char* text) {
 	rib_Error err = MakeErrorCode(OK);
 	const char* p = text;
 	rib_Noun expr;
-	while (*p) {
-		if (isspace(*p)) {
-			p++;
-			continue;
-		}
 
+	rib_Vector* v = calloc(1, sizeof(rib_Vector));
+	vector_new(v);
+
+	while (*p) {
 		err = read_expr(p, &p, &expr);
 		if (err._) { break; }
-
-		putchar('\n');
-		gen(expr);
+		vector_add(v, expr);
 	}
+
+	return v;
 }

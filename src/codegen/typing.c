@@ -1,48 +1,60 @@
 #include "codegen.h"
 
-LLVMTypeRef type_calculate(rib_Noun n) {
-	switch (n.value.symbol[0]) {
-		case 'i': {
-			if (!strcmp(n.value.symbol, "i8")) {
-				return LLVMInt8Type();
-			} else if (!strcmp(n.value.symbol, "i16")) {
-				return LLVMInt16Type();
-			} else if (!strcmp(n.value.symbol, "i32")) {
-				return LLVMInt32Type();
-			} else if (!strcmp(n.value.symbol, "i64")) {
-				return LLVMInt64Type();
-			} else if (!strcmp(n.value.symbol, "i128")) {
-				return LLVMInt128Type();
-			}
-		}
-		case 's': {
-			return LLVMPointerType(LLVMInt8Type(), 0);
-		}
-		default: {
-			break;
-		}
+rib_type read_type(const char* typename) {
+	if (!strcmp(typename, "void")) {
+		return type_void;
+	} else if (!strcmp(typename, "int")) {
+		return type_int;
+	} else if (!strcmp(typename, "nat")) {
+		return type_nat;
+	} else if (!strcmp(typename, "real")) {
+		return type_real;
+	} else if (!strcmp(typename, "bool")) {
+		return type_bool;
+	} else if (!strcmp(typename, "char")) {
+		return type_char;
+	} else if (!strcmp(typename, "word")) {
+		return type_word;
+	} else if (!strcmp(typename, "buffer")) {
+		return type_bitbuffer;
+	} else {
+		return type_void;
 	}
-
-	// if (!strcmp(sym, "void")) { return LLVMVoidType(); }
-	return LLVMVoidType();
 }
 
-LLVMTypeRef type_infer(rib_Noun n) {
-	switch (n.type) {
-		case number_t: {
-			/* TODO: handle floats properly once we have ints in the
-			 * parser */
-			return LLVMInt32Type();
-		}
-		case string_t: {
-			/* Not certain this is the correct type, seems to be
-			 * what puts() takes */
-			return LLVMPointerType(LLVMInt8Type(), 0);
-		}
-		default: {
+LLVMTypeRef type_build(rib_type type) {
+	switch (type) {
+		case type_void: return LLVMVoidType();
+		case type_int:
+		case type_nat: return LLVMInt64Type();
+		case type_real: return LLVMDoubleType();
+		case type_char: return LLVMInt8Type();
+		case type_bool: return LLVMInt1Type();
+		/* TODO: check this works */
+		case type_word: return LLVMIntType(sizeof(void*) * 8);
+		/* TODO: add bitbuffers */
+		default: return LLVMVoidType();
+	}
+}
 
-			fputs("Got here A1", stderr);
-			return NULL;
-		}
+LLVMValueRef int_literal(int32_t i) {
+	return LLVMConstInt(LLVMInt64Type(), i, (LLVMBool) false);
+}
+
+LLVMValueRef real_literal(double i) {
+	return LLVMConstReal(LLVMDoubleType(), i);
+}
+
+LLVMValueRef string_literal(rib_state* state, const char* s) {
+	return LLVMBuildGlobalStringPtr(state->builder, s, "");
+}
+
+LLVMValueRef default_val(LLVMTypeRef type) {
+	if (type == LLVMInt64Type()) {
+		return int_literal(0);
+	} else if (type == LLVMDoubleType()) {
+		return real_literal(0);
+	} else {
+		return NULL;
 	}
 }
