@@ -4,7 +4,6 @@ A LISP syntax compiler backend emitting LLVM.
 
 :construction: Not currently usable for anything meaningful.
 
-I am actively working on this, don't expect it to die any time soon.
 
 ```clj
 (define square real real {
